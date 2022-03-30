@@ -105,7 +105,7 @@ namespace WinFormsApp1
             thReveive = new Thread(ReceiveData);
             thReveive.Start();
             Balls control = new Balls();// 要處理的動作
-            control.random_little_balls(little_balls_number,ref entry) ;
+            control.random_little_balls(little_balls_number,ref entry) ;//初次進入撒小點點
             while (true)
             {
                 if(_pause.WaitOne(Timeout.Infinite) ==false )break;
@@ -116,8 +116,12 @@ namespace WinFormsApp1
                         if(!Get_current(ref balls,ID))break; //如果被刪除
                         control.Ball_move(ref balls);//如果client 端要處理就不用了，如果沒有的話把 上下左右放進來Ball (u,d,l,r)
                         control.Count_collision(ref dicClient);//如果client 端要處理就不用了，我函式再改成統合狀態就好
-
-
+                        dicClient[ID] = balls;
+                        /*lock (_thisLock) 萬一共用變數有問題
+                        {
+                            //TODO
+                        }
+                        */
                         //傳送的json string
                         //很重要!!!
                         string jsonstring = JsonSerializer.Serialize(balls);
@@ -172,6 +176,12 @@ namespace WinFormsApp1
                     thSending.Start();
                     continue;
                 }
+                /*lock (_thisLock) 萬一共用變數有問題
+                {
+                    //TODO
+                }
+                */
+                //也可以改成傳進來的只有需要的參數 就不用receive 並更新一整個 object
                 dicClient[receive.s.ToString()] = receive; //更新客戶們狀態
             }
 
