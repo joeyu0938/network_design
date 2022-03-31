@@ -130,14 +130,14 @@ namespace WinFormsApp1
                         //從進來的endpoint(紀錄的Ip & port)出去
                         //傳送的json string
                         //很重要!!!
-                        Thread.Sleep(10);
                     }
                     catch
                     {
-                        AddMessage(string.Format("Cannot entry :{0}", dicClient[ID].s.ToString())); //server報錯
+                        
                         cnt++;
-                        if(cnt ==20)
+                        if(cnt == 1000)
                         {
+                            AddMessage(string.Format("Cannot entry :{0}", dicClient[ID].s.ToString())); //server報錯
                             dicClient.Remove(ID);
                             break;
                         }
