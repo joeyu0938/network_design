@@ -15,17 +15,16 @@ namespace WinFormsApp1
     partial class UDPCommunication : Form1
     {   //宣告類別變數
         Dictionary<string, Ball> dicClient;//連線的客戶端集合
-        bool sendingFlag = true;
+        List<litte_ball> random_little_ball_set;
         bool receiveingFlag = true;
         IPEndPoint iep_Receive = null;
-        Socket socketClient = null;
         Socket socketServer = null;
         byte[] byteSendingArray = null;
         byte[] byteReceiveArray = null;
         private Form1 form;
-        Thread thSending;
         Thread thReveive;
         ManualResetEvent _pause;
+        int little_balls_number = 100;//一百個小點點
 
         //從 Form1 把 UI 控制權傳到函數裡面
         public void pause(Form1 c)//暫停 (備註:但socket會持續接收:)
@@ -57,6 +56,9 @@ namespace WinFormsApp1
         private void OpenSendAndReceiveThread()
         {
             _pause = new ManualResetEvent(true); //用來插入event 操作
+            Balls control = new Balls();
+            random_little_ball_set = new List<litte_ball>();
+            control.random_little_balls(little_balls_number,ref random_little_ball_set);
             thReveive = new Thread(ReceiveData);
             thReveive.Start();
         }
@@ -73,50 +75,42 @@ namespace WinFormsApp1
             }
             else // 同執行緒
             {
+                
                 this.form.listBox1.Items.Add(sMessage);
             }
         }
-        //傳入: Ball 的參考 , ID 號碼
-        //傳回false: 如果不存在用戶
-        //傳回true : get 現在狀態，返回true
-        private bool Get_current(ref Ball b, string id)
-        {
-            if (dicClient.ContainsKey(id) != true) return false;
-            b = dicClient[id];//將參考的BALL狀態指定給dict中的ID
-            return true;
-        }
-
+    
 
         //傳入: Ball的參數 開始傳送data
-        private void SendingData(Ball entry)//Sendingdata 會在新增client 的時候自動再開一個thread
+        private void SendingData(string ID)//Sendingdata 會在新增client 的時候自動再開一個thread
         {
-            int little_balls_number = 100;//一百個小點點
-            string ID = entry.s.ToString(); //初次進入thread 先將ID 取出
+            
             Thread.Sleep(500);//休眠0.5秒
-            if (sendingFlag)
-            {
-                byteSendingArray = new byte[10000];
+            byteSendingArray = new byte[10000];
                 //定義網路地址
-                socketClient = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);//定義client 接收樣板
-                sendingFlag = false;
-            }
+            Socket socketClient = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);//定義client 接收樣板
             //傳送資料
             AddMessage("傳送");
-            thReveive = new Thread(ReceiveData);
-            thReveive.Start();
             Balls control = new Balls();// 要處理的動作
-            control.random_little_balls(little_balls_number,ref entry) ;//初次進入撒小點點
+            dicClient[ID].little_balls = random_little_ball_set;//初次進入撒現在剩下的小點點
             while (true)
             {
                 if(_pause.WaitOne(Timeout.Infinite) ==false )break;
                 {
                     try
                     {
-                        Ball balls = new Ball(); //要傳的資料
-                        if(!Get_current(ref balls,ID))break; //如果被刪除
-                        control.Ball_move(ref balls);//如果client 端要處理就不用了，如果沒有的話把 上下左右放進來Ball (u,d,l,r)
+                        if (dicClient.ContainsKey(ID) != true) break;//如果被刪除，跳出
+                        //設定共有變數
+                        dicClient[ID].little_balls = random_little_ball_set;
+                        dicClient[ID].Other_ID = dicClient;
+                        //設定共有變數
+                        Ball b= new Ball();
+                        b = dicClient[ID];//為了可以傳參考
+                        control.Ball_move(ref b);//如果client 端要處理就不用了，如果沒有的話把 上下左右放進來Ball (u,d,l,r)
+                        dicClient[ID] = b;//改變ID狀態
                         control.Count_collision(ref dicClient);//如果client 端要處理就不用了，我函式再改成統合狀態就好
-                        dicClient[ID] = balls;
+                        random_little_ball_set = dicClient[ID].little_balls;
+                        dicClient[ID].Other_ID = dicClient;
                         /*lock (_thisLock) 萬一共用變數有問題
                         {
                             //TODO
@@ -124,21 +118,20 @@ namespace WinFormsApp1
                         */
                         //傳送的json string
                         //很重要!!!
-                        string jsonstring = JsonSerializer.Serialize(balls);
+                        string jsonstring = JsonSerializer.Serialize(dicClient[ID]);
                         //位元組轉換
                         byteSendingArray = Encoding.UTF8.GetBytes(jsonstring);
-                        socketClient.SendTo(byteSendingArray,entry.s);//從進來的endpoint(紀錄的Ip & port)出去
+                        AddMessage(string.Format("Sending to {0}", dicClient[ID].s.ToString()));
+                        socketClient.SendTo(byteSendingArray, dicClient[ID].s);//從進來的endpoint(紀錄的Ip & port)出去
                         //傳送的json string
                         //很重要!!!
                     }
                     catch
                     {
-                        AddMessage(string.Format("Cannot entry :{0}",entry.s.ToString())); //server報錯
+                        AddMessage(string.Format("Cannot entry :{0}", dicClient[ID].s.ToString())); //server報錯
                     }
                 }
             }
-            socketClient.Shutdown(SocketShutdown.Both); //關掉此執行緒 接收和傳送的socket
-            socketClient.Close();
         }
 
         //接收執行緒的方法
@@ -158,6 +151,7 @@ namespace WinFormsApp1
             while (true)
             {
                 if (_pause.WaitOne(Timeout.Infinite) == false) break;
+
                 //接收傳來的json string
                 //很重要!!!
                 int intReceiveLenght = socketServer.ReceiveFrom(byteReceiveArray, ref ep);
@@ -172,7 +166,7 @@ namespace WinFormsApp1
                     if (receive.Dead == true) continue; //如果用戶死亡
                     dicClient.Add(ep.ToString(), receive);
                     AddMessage(string.Format("Add {0}", receive.s));
-                    thSending = new Thread(()=>SendingData(receive));
+                    Thread thSending = new Thread(()=>SendingData(ep.ToString()));
                     thSending.Start();
                     continue;
                 }
@@ -182,10 +176,10 @@ namespace WinFormsApp1
                 }
                 */
                 //也可以改成傳進來的只有需要的參數 就不用receive 並更新一整個 object
-                dicClient[receive.s.ToString()] = receive; //更新客戶們狀態
+                if (receive.Dead == true) dicClient.Remove(receive.s.ToString());
+                else dicClient[receive.s.ToString()] = receive; //更新客戶們狀態
             }
 
         }
-
     }//class_end
 }

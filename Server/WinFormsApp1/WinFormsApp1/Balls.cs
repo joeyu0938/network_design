@@ -27,38 +27,23 @@ namespace Classlibary
 
     public class Balls //對Ball 操作的類別
     {
-        public void ADD_SELF(string s, ref Ball b)
-        {
-            b.ID = s;
-        }
-        public void ADD_Other_ID(string s, ref Ball b)
-        {
-            bool exist = b.Other_ID.ContainsKey(s);
-            if (exist == false)
-            {
-                b.Other_ID.Add(s, b);
-            }
-            else
-            {
-                Console.WriteLine("Add already");
-            }
-        }
-        public void Add_litle_balls(int x, int y,ref Ball b)
-        {
-            litte_ball tmp = new litte_ball();
-            tmp.x = x;
-            tmp.y = y;
-            if (b.little_balls.Contains(tmp)) return;
-            b.little_balls.Add(tmp);
-        }
-        public void random_little_balls(int number,ref Ball b)
+        //最一開始才要用
+        public void random_little_balls(int number, ref List<litte_ball> l)
         {
             Random random = new Random();
             for(int i = 0; i < number; i++)
             {
-                Add_litle_balls(random.Next(0,1500), random.Next(0,850),ref b);//視窗x.y;
+                litte_ball tmp = new litte_ball();
+                tmp.x = random.Next(0, 1500);
+                tmp.y = random.Next(0, 850);
+                if (!l.Contains(tmp))
+                {
+                    l.Add(tmp);
+                }
+                else i--;
             }
         }
+        //最一開始才要用
         public void Count_collision(ref Dictionary<string, Ball> other)
         {
             Balls control = new Balls();
@@ -67,6 +52,7 @@ namespace Classlibary
             {
                 foreach(KeyValuePair<string,Ball> y in other)
                 {
+                    if (x.Key == y.Key) continue;
                     if(Math.Pow(Math.Abs(x.Value.x - y.Value.x),2) + Math.Pow(Math.Abs(x.Value.y - y.Value.y),2) < Math.Pow(x.Value.r + y.Value.r, 2))
                     {
                         x.Value.collision = true;
@@ -74,16 +60,18 @@ namespace Classlibary
                         if (x.Value.r > y.Value.r)
                         {
                             y.Value.Dead = true;
-                            Ball b = y.Value;
-                            control.Add_litle_balls(y.Value.x, y.Value.y, ref b);
-                            other[y.Key]= b;
+                            litte_ball c =new litte_ball();
+                            c.x = y.Value.x;
+                            c.y = y.Value.y;
+                            y.Value.little_balls.Add(c);
                         }
                         else
                         {
                             x.Value.Dead = true;
-                            Ball b = x.Value;
-                            control.Add_litle_balls(x.Value.x, x.Value.y, ref b);
-                            other[x.Key] = b;
+                            litte_ball c = new litte_ball();
+                            c.x = x.Value.x;
+                            c.y = x.Value.y;
+                            x.Value.little_balls.Add(c);
                         }
                     }
                 }
@@ -105,6 +93,16 @@ namespace Classlibary
                 case 'u':
                     b.y += 1;
                     break;
+                default:
+                    return;
+            }
+            litte_ball d = new litte_ball();
+            d.x = b.x;
+            d.y = b.y;
+            if (b.little_balls.Contains(d))
+            {
+                b.little_balls.Remove(d);
+                b.r += 3;//半徑變大
             }
         }
     }
