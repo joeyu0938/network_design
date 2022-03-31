@@ -1,11 +1,30 @@
 {
   "version": 3,
   "targets": {
-    "net6.0-windows7.0": {}
+    "net6.0-windows7.0": {
+      "SocketControl/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v6.0",
+        "compile": {
+          "bin/placeholder/SocketControl.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/SocketControl.dll": {}
+        }
+      }
+    }
   },
-  "libraries": {},
+  "libraries": {
+    "SocketControl/1.0.0": {
+      "type": "project",
+      "path": "../SocketControl/SocketControl.csproj",
+      "msbuildProject": "../SocketControl/SocketControl.csproj"
+    }
+  },
   "projectFileDependencyGroups": {
-    "net6.0-windows7.0": []
+    "net6.0-windows7.0": [
+      "SocketControl >= 1.0.0"
+    ]
   },
   "packageFolders": {
     "C:\\Users\\dragonphoenix\\.nuget\\packages\\": {}
@@ -13,11 +32,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "Z:\\程式設計\\C#練習\\WFclient\\WFclient\\WFclient.csproj",
+      "projectUniqueName": "C:\\Users\\dragonphoenix\\Desktop\\network_design\\WFclient\\WFclient\\WFclient.csproj",
       "projectName": "WFclient",
-      "projectPath": "Z:\\程式設計\\C#練習\\WFclient\\WFclient\\WFclient.csproj",
+      "projectPath": "C:\\Users\\dragonphoenix\\Desktop\\network_design\\WFclient\\WFclient\\WFclient.csproj",
       "packagesPath": "C:\\Users\\dragonphoenix\\.nuget\\packages\\",
-      "outputPath": "Z:\\程式設計\\C#練習\\WFclient\\WFclient\\obj\\",
+      "outputPath": "C:\\Users\\dragonphoenix\\Desktop\\network_design\\WFclient\\WFclient\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\dragonphoenix\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -33,7 +52,11 @@
       "frameworks": {
         "net6.0-windows7.0": {
           "targetAlias": "net6.0-windows",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Users\\dragonphoenix\\Desktop\\network_design\\WFclient\\SocketControl\\SocketControl.csproj": {
+              "projectPath": "C:\\Users\\dragonphoenix\\Desktop\\network_design\\WFclient\\SocketControl\\SocketControl.csproj"
+            }
+          }
         }
       },
       "warningProperties": {

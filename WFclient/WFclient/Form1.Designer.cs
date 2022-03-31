@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.button1 = new System.Windows.Forms.Button();
-            this.BGW_recive = new System.ComponentModel.BackgroundWorker();
             this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
@@ -42,13 +41,6 @@
             this.button1.Text = "開始遊戲";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
-            // BGW_recive
-            // 
-            this.BGW_recive.WorkerReportsProgress = true;
-            this.BGW_recive.WorkerSupportsCancellation = true;
-            this.BGW_recive.DoWork += new System.ComponentModel.DoWorkEventHandler(this.BGW_recive_DoWork);
-            this.BGW_recive.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.BGW_recive_ProgressChanged);
             // 
             // label1
             // 
@@ -69,6 +61,7 @@
             this.KeyPreview = true;
             this.Name = "Form1";
             this.Text = "Form1";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
             this.Resize += new System.EventHandler(this.Form1_Resize);
             this.ResumeLayout(false);
@@ -78,7 +71,6 @@
 
         #endregion
         private Button button1;
-        private System.ComponentModel.BackgroundWorker BGW_recive;
         private Label label1;
     }
 }

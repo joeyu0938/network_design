@@ -65,13 +65,17 @@ namespace WinFormsApp1
         private delegate void UPDATE_UI(string s); //委派函數，可以在不同執行緒上操作主緒的UI
         //private delegate void UPDATE_BALL(Ball s); 如果改共用參數衝突發生只能走委派
 
-        //傳入:要在server印出的message
+        //傳入:要在server印出的message*
         private void AddMessage(string sMessage)
         {
             if (this.form.listBox1.InvokeRequired) // 若非同執行緒
             {
                 UPDATE_UI del = new UPDATE_UI(AddMessage); //利用委派執行
                 this.form.listBox1.Invoke(del, sMessage);//從操作主緒的UI
+                this.form.Invoke( () =>
+                {
+                    form.listBox1.TopIndex = form.listBox1.Items.Count - 1;
+                });
             }
             else // 同執行緒
             {
@@ -126,6 +130,7 @@ namespace WinFormsApp1
                         //從進來的endpoint(紀錄的Ip & port)出去
                         //傳送的json string
                         //很重要!!!
+                        Thread.Sleep(10);
                     }
                     catch
                     {
