@@ -84,7 +84,7 @@ namespace WinFormsApp1
         //傳入: Ball的參數 開始傳送data
         private void SendingData(string ID)//Sendingdata 會在新增client 的時候自動再開一個thread
         {
-            
+            int cnt = 0;
             Thread.Sleep(500);//休眠0.5秒
             byteSendingArray = new byte[10000];
                 //定義網路地址
@@ -122,16 +122,24 @@ namespace WinFormsApp1
                         //位元組轉換
                         byteSendingArray = Encoding.UTF8.GetBytes(jsonstring);
                         AddMessage(string.Format("Sending to {0}", dicClient[ID].s.ToString()));
-                        socketClient.SendTo(byteSendingArray, dicClient[ID].s);//從進來的endpoint(紀錄的Ip & port)出去
+                        socketClient.SendTo(byteSendingArray, dicClient[ID].s);
+                        //從進來的endpoint(紀錄的Ip & port)出去
                         //傳送的json string
                         //很重要!!!
                     }
                     catch
                     {
                         AddMessage(string.Format("Cannot entry :{0}", dicClient[ID].s.ToString())); //server報錯
+                        cnt++;
+                        if(cnt ==20)
+                        {
+                            dicClient.Remove(ID);
+                            break;
+                        }
                     }
                 }
             }
+            return;
         }
 
         //接收執行緒的方法
