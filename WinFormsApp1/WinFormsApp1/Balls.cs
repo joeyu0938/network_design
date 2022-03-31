@@ -44,7 +44,7 @@ namespace Classlibary
             }
         }
         //最一開始才要用
-        public void Count_collision(ref Dictionary<string, Ball> other)
+        public void Count_collision(ref Dictionary<string, Ball> other,ref List<litte_ball> little_ball_set)
         {
             Balls control = new Balls();
             //我先用n^2 寫
@@ -63,7 +63,7 @@ namespace Classlibary
                             litte_ball c =new litte_ball();
                             c.x = y.Value.x;
                             c.y = y.Value.y;
-                            y.Value.little_balls.Add(c);
+                            little_ball_set.Add(c);
                         }
                         else
                         {
@@ -71,38 +71,38 @@ namespace Classlibary
                             litte_ball c = new litte_ball();
                             c.x = x.Value.x;
                             c.y = x.Value.y;
-                            x.Value.little_balls.Add(c);
+                            little_ball_set.Add(c);
                         }
                     }
                 }
             }
         }
-        public void Ball_move(ref Ball b)//移動
+        public void Ball_move(ref Dictionary<string, Ball> dic , string id)//移動
         {
-            switch (b.move)
+            switch (dic[id].move)
             {
+                case 'w':
+                    dic[id].y -= 1;
+                    break;
                 case 'd':
-                    b.y -= 1;
+                    dic[id].x += 1;
                     break;
-                case 'r':
-                    b.x += 1;
+                case 'a':
+                    dic[id].x -= 1;
                     break;
-                case 'l':
-                    b.x -= 1;
-                    break;
-                case 'u':
-                    b.y += 1;
+                case 's':
+                    dic[id].y += 1;
                     break;
                 default:
                     return;
             }
             litte_ball d = new litte_ball();
-            d.x = b.x;
-            d.y = b.y;
-            if (b.little_balls.Contains(d))
+            d.x = dic[id].x;
+            d.y = dic[id].y;
+            if (dic[id].little_balls.Contains(d))
             {
-                b.little_balls.Remove(d);
-                b.r += 3;//半徑變大
+                dic[id].little_balls.Remove(d);
+                dic[id].r += 3;//半徑變大
             }
         }
     }

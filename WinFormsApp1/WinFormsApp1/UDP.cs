@@ -97,6 +97,7 @@ namespace WinFormsApp1
             AddMessage("傳送");
             Balls control = new Balls();// 要處理的動作
             dicClient[ID].little_balls = random_little_ball_set;//初次進入撒現在剩下的小點點
+            AddMessage(string.Format("Sending to {0}", dicClient[ID].s.ToString()));
             while (true)
             {
                 if(_pause.WaitOne(Timeout.Infinite) ==false )break;
@@ -108,12 +109,9 @@ namespace WinFormsApp1
                         dicClient[ID].little_balls = random_little_ball_set;
                         dicClient[ID].Other_ID = dicClient;
                         //設定共有變數
-                        Ball b= new Ball();
-                        b = dicClient[ID];//為了可以傳參考
-                        control.Ball_move(ref b);//如果client 端要處理就不用了，如果沒有的話把 上下左右放進來Ball (u,d,l,r)
-                        dicClient[ID] = b;//改變ID狀態
-                        control.Count_collision(ref dicClient);//如果client 端要處理就不用了，我函式再改成統合狀態就好
-                        random_little_ball_set = dicClient[ID].little_balls;
+                        control.Ball_move(ref dicClient,ID);//如果client 端要處理就不用了，如果沒有的話把 上下左右放進來Ball (u,d,l,r)
+                        control.Count_collision(ref dicClient,ref random_little_ball_set);//如果client 端要處理就不用了，我函式再改成統合狀態就好
+                        dicClient[ID].little_balls = random_little_ball_set;
                         dicClient[ID].Other_ID = dicClient;
                         /*lock (_thisLock) 萬一共用變數有問題
                         {
@@ -125,7 +123,7 @@ namespace WinFormsApp1
                         string jsonstring = JsonSerializer.Serialize(dicClient[ID]);
                         //位元組轉換
                         byteSendingArray = Encoding.UTF8.GetBytes(jsonstring);
-                        AddMessage(string.Format("Sending to {0}", dicClient[ID].s.ToString()));
+                        //AddMessage(string.Format("Sending to {0}", dicClient[ID].s.ToString()));
                         socketClient.SendTo(byteSendingArray, dicClient[ID].s);
                         //從進來的endpoint(紀錄的Ip & port)出去
                         //傳送的json string
@@ -179,7 +177,7 @@ namespace WinFormsApp1
                     if (receive.Dead == true) continue; //如果用戶死亡
                     dicClient.Add(ep.ToString(), receive);
                     AddMessage(string.Format("Add {0}", receive.s));
-                    Thread thSending = new Thread(()=>SendingData(ep.ToString()));
+                    Thread thSending = new Thread(()=>SendingData(receive.s.ToString()));
                     thSending.Start();
                     continue;
                 }
